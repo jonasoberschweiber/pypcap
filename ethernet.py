@@ -17,7 +17,8 @@ class EthernetPacket():
         return result[:-1]
 
 class IPPacket():
-    def __init__(self, data):
+    def __init__(self, data, ethernet):
+        self.ethernet = ethernet
         self.version = (ord(data[0:1]) & 0xf0) >> 4
         self.header_len = (ord(data[0:1]) & 0x0f) * 32 / 8
         self.tos = ord(data[1:2])
@@ -106,7 +107,7 @@ def tcp_streams_from_file(path):
     p = f.next_packet()
     while p != None:
         e = EthernetPacket(p.data)
-        ip = IPPacket(e.data)
+        ip = IPPacket(e.data, e)
         tcp = TCPPacket(ip.data, ip)
         stream = find_stream(tcp, streams)
         if not stream:
